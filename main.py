@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, abort, request, make_response, jsonify
+from flask import Flask
 from data import db_session
 
 
@@ -7,7 +7,7 @@ app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
 def main():
-    db_session.global_init("db/yaly.db")
+    db_session.global_init("db/yaly.sqlite")
     app.run(port=8080, host='127.0.0.1')
 
 
