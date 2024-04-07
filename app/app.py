@@ -12,7 +12,9 @@ login_manager.init_app(app)
 
 
 def main() -> None:
-    db_session.global_init("yaly.sqlite")
+    db_session.global_init("../db/yaly.sqlite")
     app.run(host="0.0.0.0", port=8080, debug=True)
 
 
+if __name__ == "__main__":
+    main()
