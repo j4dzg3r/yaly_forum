@@ -1,9 +1,10 @@
 import datetime
 import sqlalchemy
-from .db_session import SqlAlchemyBase
+from .db_session import SqlAlchemyBase, create_session
 from flask_login import UserMixin
 from sqlalchemy_serializer import SerializerMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from typing import Self
 
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
@@ -22,3 +23,15 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
+
+    @staticmethod
+    def get_by_id(_id: int):
+        sess = create_session()
+        return sess.query(User).filter_by(id=_id).first()
+
+    @staticmethod
+    def get_all_users():
+        sess = create_session()
+        return sess.query(User).all()
+
+
