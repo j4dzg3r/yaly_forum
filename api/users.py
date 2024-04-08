@@ -1,9 +1,4 @@
-from flask import jsonify
 from flask_restful import Resource, reqparse
-
-from app.app import app
-from data.users import User
-
 
 parser = reqparse.RequestParser()
 parser.add_argument('nickname', required=True)
