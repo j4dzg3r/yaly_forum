@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<h1>{{ title }}</h1>
+{% if answer %}
+    <p></p>
+    <p>{{ markdown_content }}</p>
+{% else %}
+    <h4>Такой статьи не существует. Вы можете <a href="/wiki/{{ title }}?action=edit">создать</a> её</h4>
+{% endif %}
+{% endblock %}
