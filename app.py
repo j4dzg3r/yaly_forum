@@ -118,9 +118,14 @@ def article(title):
             return render_template('article.html', title=title, answer=False)
 
 
+@app.route('/wiki')
+def wiki():
+    return render_template("base.html", title="Wiki")
+
+
 @app.route('/')
 def index():
-    return render_template("base.html", title="Yaly")
+    return redirect('/wiki')
 
 
 def main() -> None:
