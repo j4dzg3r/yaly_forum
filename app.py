@@ -1,8 +1,7 @@
 from flask import (Flask, render_template, redirect)
-from flask_login import (LoginManager, login_user, login_required,
-                         logout_user)
+from flask_login import LoginManager, login_user, login_required, logout_user
 
-from flask import Flask, render_template, redirect, abort, request, make_response, jsonify
+from flask import Flask, render_template, render_template_string, redirect, request
 from flask_login import LoginManager
 from flask_restful import reqparse, abort, Api, Resource
 from forms.revision import RevisionForm
@@ -18,7 +17,6 @@ from datetime import datetime
 import os
 
 from datetime import datetime, timedelta
-
 
 template_dir = "templates"
 static_dir = "static"
@@ -42,6 +40,8 @@ def load_user(user_id):
 def logout():
     logout_user()
     return redirect("/")
+
+
 api = Api(app)
 
 
@@ -75,6 +75,10 @@ def sign_up():
     return render_template("sign_up_user.html", form=form, title="Sign Up")
 
 
+def hu(html, content):
+    return html.replace("~hu~", content)
+
+
 @app.route('/wiki/<string:title>', methods=['GET', 'POST'])
 def article(title):
     form = RevisionForm()
@@ -85,7 +89,7 @@ def article(title):
     if article_exist:
         article = db_sess.query(Article).filter(Article.title == title).first()
         if request.method == "GET" and article_exist:
-                form.content.data = article.revisions[-1].markdown_content
+            form.content.data = article.revisions[-1].markdown_content
     if is_editing:
         if form.validate_on_submit():
             if not article_exist:
@@ -112,10 +116,18 @@ def article(title):
     else:
         if article_exist:
             article = db_sess.query(Article).filter(Article.title == title).first()
-            markdown_content = db_sess.query(Revision).filter(Revision.article_id == article.id).all()[-1].markdown_content
-            return render_template('article.html', title=title, markdown_content=markdown_content, answer=True)
+            markdown_cont = db_sess.query(Revision).filter(Revision.article_id == article.id).all()[-1].markdown_content
+            html = open("templates/article.html", encoding="utf8")
+            html_lines = hu("".join(list(html.readlines())), markdown_cont)
+            html.close()
+            return render_template_string(html_lines, title=title, answer=True)
         else:
             return render_template('article.html', title=title, answer=False)
+
+
+@app.route('/lol', methods=['GET', 'POST'])
+def lol():
+    return render_template('attempt.html')
 
 
 @app.route('/wiki')
