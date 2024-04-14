@@ -1,4 +1,4 @@
-from flask import (Flask, render_template, redirect)
+from flask import Flask, render_template, redirect, url_for
 from flask_login import LoginManager, login_user, login_required, logout_user
 
 from flask import Flask, render_template, render_template_string, redirect, request
@@ -125,7 +125,7 @@ def article(title):
             return render_template('article.html', title=title, answer=False)
 
 
-@app.route('/lol', methods=['GET', 'POST'])
+@app.route('/lol')
 def lol():
     return render_template('attempt.html')
 
