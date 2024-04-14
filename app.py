@@ -129,7 +129,7 @@ def article(title):
             return render_template('article.html', title=title, answer=False)
 
 
-@app.route('/lol', methods=['GET', 'POST'])
+@app.route('/lol')
 def lol():
     return render_template('attempt.html')
 
