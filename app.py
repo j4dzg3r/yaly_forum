@@ -22,10 +22,14 @@ from datetime import datetime, timedelta
 template_dir = "templates"
 static_dir = "static"
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app.json.sort_keys = False
 app.config["SECRET_KEY"] = "dfaasdjkfajsdkfjaklsdhjklfasjhdk"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 api = Api(app)
-api.add_resource(ArticleAPI, '/articles/<int:article_id>')
+api.add_resource(ArticleAPI,
+                 '/articles/id/<int:article_id>',
+                 '/articles/<string:article_title>',
+                 "/articles")
 login_manager = LoginManager()
 login_manager.init_app(app)
 HOST = '127.0.0.1'
