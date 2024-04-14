@@ -7,18 +7,19 @@ from data.revisions import Revision
 
 
 class ArticleAPI(Resource):
-    def get(self, post_id):
+    def get(self, article_id):
         sess = db_session.create_session()
         res = (sess.query(Article)
                .join(Revision)
-               .get(post_id)
-               .filter_by(verified=True)
+               .filter(Article.id == article_id)
+               .filter_by(verified=False)
                .order_by(Revision.created_at.desc())
                .first())
         if res:
             return jsonify({
-                "id": res.id,
+                "article_id": res.id,
                 "title": res.title,
                 "content": res.revisions.markdown_content,
-                "created_at": res.revisions.created_at
+                "created_at": res.revisions.created_at,
+                "author_id": res.revisions.author_id
             })

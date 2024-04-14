@@ -1,11 +1,10 @@
-from flask import (Flask, render_template, redirect)
 from flask_login import (LoginManager, login_user, login_required,
                          logout_user)
 
-from flask import Flask, render_template, redirect, abort, request, make_response, jsonify
+from flask import (Flask, render_template, redirect,
+                   abort, request, make_response, jsonify)
 from flask_login import LoginManager
 from flask_restful import reqparse, abort, Api, Resource
-from forms.revision import RevisionForm
 
 from data import db_session
 from data.revisions import Revision
@@ -14,8 +13,8 @@ from data.users import User
 
 from forms.user import UserSignInForm, UserSignUpForm
 from forms.revision import RevisionForm
-from datetime import datetime
-import os
+
+from api.articles import ArticleAPI
 
 from datetime import datetime, timedelta
 
@@ -25,6 +24,8 @@ static_dir = "static"
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config["SECRET_KEY"] = "dfaasdjkfajsdkfjaklsdhjklfasjhdk"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+api = Api(app)
+api.add_resource(ArticleAPI, '/articles/<int:article_id>')
 login_manager = LoginManager()
 login_manager.init_app(app)
 HOST = '127.0.0.1'

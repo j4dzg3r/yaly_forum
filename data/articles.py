@@ -9,4 +9,4 @@ class Article(SqlAlchemyBase, SerializerMixin):
     title = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
     categories = sqlalchemy.orm.relationship('Category', secondary='association', backref='article')
-    revisions = sqlalchemy.orm.relationship('Revision', back_populates='article')
+    revisions = sqlalchemy.orm.relationship('Revision', back_populates='article', uselist=False)
