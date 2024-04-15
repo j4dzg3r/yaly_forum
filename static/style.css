@@ -8,13 +8,16 @@ body, h1, p{
     text-decoration: none;
 }
 
-header{
+header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: white;
     color: black;
     padding: 10p 20px;
+    top: 0;
+    background-image: linear-gradient(to bottom, #fff 50%, #f6f6f6 100%);
+    //background-image: linear-gradient(to top,#77c1f6 0,#e8f2f8 1px,#fff 100%);
+
 }
 
 .logo img{
@@ -22,11 +25,14 @@ header{
     max-height: 150px;
 }
 
+.search-box{
+    position: relative;
+}
+
 .search-box input{
     padding: 5px;
     border: 1px solid blue;
-    float: right;
-
+    float: left;
 }
 
 .search-box button{
@@ -35,12 +41,6 @@ header{
     border: 1px solid blue;
     padding: 5px 10px;
     cursor: pointer;
-}
-
-.user-links a{
-    color: blue;
-    text-decoration: none;
-    margin-left: 10px;
 }
 
 .main-content{
@@ -94,6 +94,7 @@ header{
     background-color: #f9f9f9
     padding: 20px;
     border: 1px solid #ddd;
+    margin: 7px 0 7px 7px;
 }
 
 .fact-sheet h3{
@@ -141,4 +142,38 @@ footer {
     color: white;
     text-align: center;
     padding: 10px;
+}
+
+
+.vector-menu-content{
+    position:absolute;
+    top:100%;
+    left:-1px;
+    opacity:0;
+    height:0;
+    visibility:hidden;
+    overflow:hidden;
+    margin:0;
+    padding:0;
+    z-index:50;
+    line-height:1.125em;
+    background-color:#fff;
+    border:1px solid #a2a9b1;
+    border-top-width:0;
+    box-shadow:0 1px 1px 0 rgba(0,0,0,0.1);
+    transition-property:opacity;
+    transition-duration:100ms;
+    min-width:100%
+}
+.vector-menu-dropdown > .vector-menu-content-list{list-style:none}
+.vector-menu-dropdown:hover .vector-menu-content{
+    opacity:1;
+    visibility:visible;
+    height:auto
+}
+.vector-menu-dropdown .mw-list-item{
+    padding:0;
+    margin:0;
+    text-align:left;
+    line-height:1em
 }
