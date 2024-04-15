@@ -126,12 +126,12 @@ def article(title):
             html.close()
             return render_template_string(html_lines, title=title, answer=True)
         else:
-            return render_template('attempt.html', title=title, answer=False)
+            return render_template('article.html', title=title, answer=False)
 
 
 @app.route('/lol')
 def lol():
-    return render_template('attempt.html')
+    return render_template('article.html')
 
 
 @app.route('/wiki')

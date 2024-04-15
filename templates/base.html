@@ -1,28 +1,37 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-          crossorigin="anonymous">
-    <title>{{title}}</title>
+          href="https://ru.wikipedia.org//w/load.php?lang=ru&modules=codex-search-styles%7Cext.echo.styles.badge%7Cext.flaggedRevs.basic%2Cicons%7Cext.tmh.player.styles%7Cext.uls.interlanguage%7Cext.visualEditor.desktopArticleTarget.noscript%7Cext.wikimediaBadges%7Cjquery.makeCollapsible.styles%7Cmediawiki.widgets.styles%7Coojs-ui-core.icons%2Cstyles%7Coojs-ui.styles.icons-alerts%2Cindicators%7Cskins.vector.styles.legacy&only=styles&skin=vector">
+    <title>{{ title }}</title>
 </head>
+
 <body>
 <header>
-    <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="#">Yaly Wiki</a>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1024px-Wikipedia-logo-v2.svg.png"
+             alt="Logo">
+    </div>
+    <div class="search-box">
+        <input type="text" placeholder=" Search Wikipedia...">
+        <button type="submit">Search</button>
+    </div>
+
+    <div class="user-links">
         {% if current_user.is_authenticated %}
-            <a class="navbar-brand" href="/logout">{{ current_user.nickname }}</a>
+        <a class="navbar-brand" href="/logout">{{ current_user.nickname }}</a>
         {% else %}
-            <p>
-                <a class="btn btn-primary " href="/sign_up">Зарегистрироваться</a>
-                <a class="btn btn-success" href="/sign_in">Войти</a>
-            </p>
+        <p>
+            <a class="btn btn-primary " href="/sign_up">Зарегистрироваться</a>
+            <a class="btn btn-success" href="/sign_in">Войти</a>
+        </p>
         {% endif %}
-    </nav>
+    </div>
 </header>
+
 <!-- Begin page content -->
 <main role="main" class="container">
     {% block content %}{% endblock %}
