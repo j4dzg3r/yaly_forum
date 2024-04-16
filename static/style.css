@@ -79,7 +79,7 @@ header {
 
 .article {
     max-width: 900px;
-    display: flex;
+    /*display: flex;*/
     flex-direction: row;
     justify-content: space-between;
 }

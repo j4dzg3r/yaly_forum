@@ -1,10 +1,7 @@
 from flask import (Flask, render_template, redirect, render_template, redirect, request, render_template_string)
-from flask_login import (LoginManager, login_user, login_required,
-                         logout_user)
+from flask_login import (LoginManager, login_user, login_required,logout_user)
 
-from flask_login import LoginManager
 from flask_restful import reqparse, abort, Api, Resource
-from forms.revision import RevisionForm
 
 from data import db_session
 from data.revisions import Revision
@@ -17,6 +14,8 @@ from forms.revision import RevisionForm
 from api.articles import ArticleAPI
 
 from datetime import datetime, timedelta
+from markdown import markdown
+from markdownify import markdownify
 
 
 template_dir = "templates"
@@ -93,7 +92,7 @@ def article(title):
     if article_exist:
         article = db_sess.query(Article).filter(Article.title == title).first()
         if request.method == "GET" and article_exist:
-            form.content.data = article.revisions[-1].markdown_content
+            form.content.data = markdownify(article.revisions[-1].markdown_content)
     if is_editing:
         if form.validate_on_submit():
             if not article_exist:
@@ -101,12 +100,12 @@ def article(title):
                     title=title
                 )
                 db_sess.add(article)
-
+            md_to_html = markdown(form.content.data)
             revision = Revision(
                 author_id=1,
                 article_id=article.id,
                 created_at=datetime.now(),
-                markdown_content=form.content.data,
+                markdown_content=md_to_html,
                 verified=False
             )
 
