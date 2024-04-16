@@ -2,27 +2,17 @@
 
 {% block content %}
 
-<div class="main-content">
-    <aside class="left-sidebar">
-        <div class="accordion">
-            ~accordion~
-        </div>
-    </aside>
+<title>{{ title }}</title>
 
-    <div class="right-content">
-        <h1>{{ title }}</h1>
-        <p> From Wifipedia, the free encyclopedia</p>
-        <div class="article">
-            {% if answer %}
-                ~hu~
-            {% else %}
-                <h4>Такой статьи не существует. Вы можете <a href="/wiki/{{ title }}?action=edit">создать</a> её</h4>
-            {% endif %}
-        </div>
+<div class="right-content">
+    <h1>{{ title }}</h1>
+    <p> From Wifipedia, the free encyclopedia</p>
+    <div class="article">
+        {% if answer %}
+            ~hu~
+        {% else %}
+            <h4>Такой статьи не существует. Вы можете <a href="/wiki/{{ title }}?action=edit">создать</a> её</h4>
+        {% endif %}
     </div>
 </div>
-
-<footer>
-    <!-- Footer content goes here -->
-</footer>
 {% endblock %}

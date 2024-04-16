@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet"
           href="https://ru.wikipedia.org//w/load.php?lang=ru&modules=codex-search-styles%7Cext.echo.styles.badge%7Cext.flaggedRevs.basic%2Cicons%7Cext.tmh.player.styles%7Cext.uls.interlanguage%7Cext.visualEditor.desktopArticleTarget.noscript%7Cext.wikimediaBadges%7Cjquery.makeCollapsible.styles%7Cmediawiki.widgets.styles%7Coojs-ui-core.icons%2Cstyles%7Coojs-ui.styles.icons-alerts%2Cindicators%7Cskins.vector.styles.legacy&only=styles&skin=vector">
-    <title>{{ title }}</title>
 </head>
 
 <body>
@@ -22,19 +21,37 @@
 
     <div class="user-links">
         {% if current_user.is_authenticated %}
-        <a class="navbar-brand" href="/logout">{{ current_user.nickname }}</a>
+            <a class="navbar-brand" href="/logout">{{ current_user.nickname }}</a>
         {% else %}
-        <p>
-            <a class="btn btn-primary " href="/sign_up">Зарегистрироваться</a>
-            <a class="btn btn-success" href="/sign_in">Войти</a>
-        </p>
+            <p>
+                <a class="btn btn-primary " href="/sign_up">Зарегистрироваться</a>
+                <a class="btn btn-success" href="/sign_in">Войти</a>
+            </p>
+        {% endif %}
+        <br>
+        {% if answer %}
+            <a href="/wiki/{{ title }}?action=edit">Править</a>
+            <a href="/wiki/{{ title }}?action=history">История</a>
         {% endif %}
     </div>
 </header>
 
 <!-- Begin page content -->
 <main role="main" class="container">
-    {% block content %}{% endblock %}
+    <div class="main-content">
+        <aside class="left-sidebar">
+            <div class="accordion">
+                <a href="/wiki">Заглавная страница</a>
+                <a href="/wiki/Служебная:Случайная_страница">Случайная статья</a>
+            </div>
+        </aside>
+        {% block content %}{% endblock %}
+    </div>
 </main>
+
+<footer>
+    <!-- Footer content goes here -->
+</footer>
+
 </body>
 </html>

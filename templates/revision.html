@@ -2,19 +2,38 @@
 
 
 {% block content %}
-<h1>Новая статья</h1>
-<form action="" method="post">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.content.label }}<br>
-        {{ form.content(class="form-control", data=default) }}<br>
-        {% for error in form.content.errors %}
-            <p content="alert alert-danger" role="alert">
-                {{ error }}
-            </p>
+
+<title>
+    {% if answer %}
+        Редактирование: {{ title }}
+
+    {% else %}
+        Создание страницы «{{ title }}»
+    {% endif %}
+</title>
+
+<div class="right-content">
+    <h1>
+        {% if answer %}
+            Редактирование: {{ title }}
+        {% else %}
+            Создание страницы «{{ title }}»
+        {% endif %}
+    </h1>
+
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.content.label }}<br>
+            {{ form.content(class="form-control", data=default) }}<br>
+            {% for error in form.content.errors %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
         {% endfor %}
-    </p>
-    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-    {{message}}
-</form>
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        {{message}}
+    </form>
+</div>
 {% endblock %}

@@ -115,7 +115,8 @@ def article(title):
             db_sess.commit()
             return redirect(f'/wiki/{title}')
         return render_template('revision.html',
-                               title=[f"Создание страницы «{title}»", f"Редактирование: {title}"][article_exist],
+                               answer=article_exist,
+                               title=title,
                                form=form)
     else:
         if article_exist:
