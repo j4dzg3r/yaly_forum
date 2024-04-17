@@ -4,15 +4,23 @@
 
 <title>{{ title }}</title>
 
-<div class="right-content">
-    <h1>{{ title }}</h1>
-    <p> From Wifipedia, the free encyclopedia</p>
-    <div class="article">
-        {% if answer %}
-            ~hu~
-        {% else %}
-            <h4>Такой статьи не существует. Вы можете <a href="/wiki/{{ title }}?action=edit">создать</a> её</h4>
-        {% endif %}
-    </div>
+<h1>{{ title }}</h1>
+<p> From Wikipedia, the free encyclopedia</p>
+{% if is_old and is_old != "cur" %}
+    {% set author = old_rev.author.nickname %}
+    {% if is_old == "?old" %}
+        <h4>Это старая версия статьи, сохранённая <a href="/wiki/Участник:{{ author }}">{{ author }}</a> в {{ old_rev.created_at }}. Она может серьёзно отличаться от <a href="/wiki/{{ title }}">текущей версии.</a></h4>
+    {% elif is_old == "?cur" %}
+        <h4>Это <a href="/wiki/{{ title }}">текущая версия.</a> страницы, сохранённая <a href="/wiki/Участник:{{ author }}">{{ author }}</a> в {{ old_rev.created_at }}. Вы просматриваете постоянную ссылку на эту версию.</h4>
+    {% endif %}
+{% endif %}
+
+<div class="article">
+    {% if answer %}
+        ~hu~
+    {% else %}
+        <h4>Такой статьи не существует. Вы можете <a href="/wiki/{{ title }}?action=edit">создать</a> её</h4>
+    {% endif %}
 </div>
+
 {% endblock %}

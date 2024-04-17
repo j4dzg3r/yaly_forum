@@ -13,6 +13,7 @@ class Revision(SqlAlchemyBase, SerializerMixin):
     created_at = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     markdown_content = sqlalchemy.Column(sqlalchemy.String)
     verified = sqlalchemy.Column(sqlalchemy.Boolean, default=False)
+    description = sqlalchemy.Column(sqlalchemy.String)
 
     author = sqlalchemy.orm.relationship('User')
     article = sqlalchemy.orm.relationship('Article')

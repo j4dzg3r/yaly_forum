@@ -1,5 +1,5 @@
 from flask import (Flask, render_template, redirect, render_template, redirect, request, render_template_string)
-from flask_login import (LoginManager, login_user, login_required,logout_user)
+from flask_login import (LoginManager, login_user, login_required, logout_user, current_user)
 
 from flask_restful import reqparse, abort, Api, Resource
 
@@ -16,7 +16,6 @@ from api.articles import ArticleAPI
 from datetime import datetime, timedelta
 from markdown import markdown
 from markdownify import markdownify
-
 
 template_dir = "templates"
 static_dir = "static"
@@ -85,7 +84,7 @@ def hu(html, content):
 @app.route('/wiki/<string:title>', methods=['GET', 'POST'])
 def article(title):
     form = RevisionForm()
-    is_editing = request.args.get('action') == "edit"
+    action = request.args.get('action')
     oldid = request.args.get('oldid')
     db_sess = db_session.create_session()
     article_exist = (title,) in list(db_sess.query(Article.title).all())
@@ -93,7 +92,7 @@ def article(title):
         article = db_sess.query(Article).filter(Article.title == title).first()
         if request.method == "GET" and article_exist:
             form.content.data = markdownify(article.revisions[-1].markdown_content)
-    if is_editing:
+    if action == "edit":
         if form.validate_on_submit():
             if not article_exist:
                 article = Article(
@@ -102,9 +101,10 @@ def article(title):
                 db_sess.add(article)
             md_to_html = markdown(form.content.data)
             revision = Revision(
-                author_id=1,
+                author_id=current_user.id,
                 article_id=article.id,
                 created_at=datetime.now(),
+                description=form.description.data,
                 markdown_content=md_to_html,
                 verified=False
             )
@@ -117,14 +117,31 @@ def article(title):
                                answer=article_exist,
                                title=title,
                                form=form)
+    elif action == "history":
+        revisions = db_sess.query(Revision).filter(Revision.article_id == article.id).all()
+        nick = db_sess.query(Revision).filter(Revision.article_id == article.id).first().author.nickname
+        print(nick)
+        return render_template('history.html',
+                               answer=article_exist,
+                               title=title,
+                               revisions=revisions)
     else:
         if article_exist:
             article = db_sess.query(Article).filter(Article.title == title).first()
-            markdown_cont = db_sess.query(Revision).filter(Revision.article_id == article.id).all()[-1].markdown_content
+            last_rev = db_sess.query(Revision).filter(Revision.article_id == article.id).all()[-1]
+
             html = open("templates/article.html", encoding="utf8")
-            html_lines = hu("".join(list(html.readlines())), markdown_cont)
+            if oldid:
+                rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
+            else:
+                rev = last_rev
+            html_lines = hu("".join(list(html.readlines())), rev.markdown_content)
             html.close()
-            return render_template_string(html_lines, title=title, answer=True)
+            return render_template_string(html_lines,
+                                          title=title,
+                                          answer=True,
+                                          is_old=["cur", "?old", "?cur"][int(oldid is not None) + int(oldid is not None and int(oldid) == last_rev.id)],
+                                          old_rev=rev)
         else:
             return render_template('article.html', title=title, answer=False)
 

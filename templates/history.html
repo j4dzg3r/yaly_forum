@@ -5,15 +5,15 @@
 
 <title>{{ title }}: история изменений</title>
 
-<div class="right-content">
-    <h1>{{ title }}: история изменений</h1>
-    <ul style="list-style-type:disc">
-        {% for rev in revisions %}
-        <li data-revid="{{ rev_id }}" class="revision">
-            <span>
-                {{ rev.time}} {{rev.author_id}} {{ rev.descr }} {{ rev.verified }}
-            </span>
-        </li>
-    </ul>
-</div>
+<h1>{{ title }}: история изменений</h1>
+<ul style="list-style-type:disc">
+    {% for rev in revisions[::-1] %}
+    <li data-revid="{{ rev_id }}" class="revision">
+        <span>
+            <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at }}</a> {{ rev.author.nickname }} {{ rev.description }} {{ rev.verified }}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+
 {% endblock %}

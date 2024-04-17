@@ -49,7 +49,6 @@ header {
 }
 
 .left-sidebar {
-    flex: 1;
     padding: 20px;
     color:#3366cc;
     background-image:linear-gradient(to bottom, #a7d7f9 0,#a7d7f9 100%);

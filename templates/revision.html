@@ -5,35 +5,43 @@
 
 <title>
     {% if answer %}
-        Редактирование: {{ title }}
+    Редактирование: {{ title }}
 
     {% else %}
-        Создание страницы «{{ title }}»
+    Создание страницы «{{ title }}»
     {% endif %}
 </title>
-<div class="right-content">
-    <p>При создании или рекатировании статьи используйте язык разметки markdown</p>
-    <h1>
-        {% if answer %}
-            Редактирование: {{ title }}
-        {% else %}
-            Создание страницы «{{ title }}»
-        {% endif %}
-    </h1>
 
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.content.label }}<br>
-            {{ form.content(class="form-control", data=default) }}<br>
-            {% for error in form.content.errors %}
-        <p content="alert alert-danger" role="alert">
-            {{ error }}
-        </p>
+<p>При создании или рекатировании статьи используйте язык разметки markdown</p>
+<h1>
+    {% if answer %}
+    Редактирование: {{ title }}
+    {% else %}
+    Создание страницы «{{ title }}»
+    {% endif %}
+</h1>
+
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.content.label }}<br>
+        {{ form.content(class="form-control", data=default) }}<br>
+        {% for error in form.content.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
         {% endfor %}
-        </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-        {{message}}
-    </form>
-</div>
+    </p>
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description(class="form-control", data=default) }}<br>
+        {% for error in form.description.errors %}
+            <p content="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    {{message}}
+</form>
 {% endblock %}
