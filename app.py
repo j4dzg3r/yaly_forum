@@ -1,4 +1,4 @@
-from flask import (Flask, render_template, redirect, render_template, redirect, request, render_template_string)
+from flask import (Flask, render_template, redirect, render_template, redirect, request, render_template_string, jsonify)
 from flask_login import (LoginManager, login_user, login_required, logout_user, current_user)
 
 from flask_restful import reqparse, abort, Api, Resource
@@ -7,6 +7,7 @@ from data import db_session
 from data.revisions import Revision
 from data.articles import Article
 from data.users import User
+from forms.search import SearchForm
 
 from forms.user import UserSignInForm, UserSignUpForm
 from forms.revision import RevisionForm
@@ -17,12 +18,16 @@ from datetime import datetime, timedelta
 from markdown import markdown
 from markdownify import markdownify
 
+from tools.nlp import tokenize
+
+
 template_dir = "templates"
 static_dir = "static"
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.json.sort_keys = False
 app.config["SECRET_KEY"] = "dfaasdjkfajsdkfjaklsdhjklfasjhdk"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.article_index = {}
 api = Api(app)
 api.add_resource(ArticleAPI,
                  '/articles/id/<int:article_id>',
@@ -101,7 +106,8 @@ def article(title):
                 db_sess.add(article)
             md_to_html = markdown(form.content.data)
             revision = Revision(
-                author_id=current_user.id,
+                # author_id=current_user.id,
+                author_id=1,
                 article_id=article.id,
                 created_at=datetime.now(),
                 description=form.description.data,
@@ -112,6 +118,7 @@ def article(title):
             article.revisions.append(revision)
             db_sess.merge(article)
             db_sess.commit()
+            app.article_index[tokenize(title)] = article.id
             return redirect(f'/wiki/{title}')
         return render_template('revision.html',
                                answer=article_exist,
@@ -151,9 +158,24 @@ def lol():
     return render_template('article.html')
 
 
-@app.route('/wiki')
+@app.route('/wiki', methods=["GET", "POST"])
 def wiki():
-    return render_template("base.html", title="Wiki")
+    form = SearchForm()
+    if form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{form.search.data}")
+    return render_template("index.html", form=form, title="Wiki")
+
+
+@app.route('/search/<string:search>')
+def search(search: str):
+    ids = []
+    search_token = tokenize(search)
+    for i, j in app.article_index.items():
+        if len(search_token & i) > 0:
+            ids.append(j)
+    sess = db_session.create_session()
+    articles = sess.query(Article).filter(Article.id.in_(ids)).all()
+    return render_template("search_results.html", articles=articles)
 
 
 @app.route('/')
@@ -163,6 +185,10 @@ def index():
 
 def main() -> None:
     db_session.global_init("db/yaly.sqlite")
+    sess = db_session.create_session()
+    articles = sess.query(Article).all()
+    for article in articles:
+        app.article_index[tokenize(article.title)] = article.id
     app.run(host=HOST, port=PORT, debug=True)
 
 

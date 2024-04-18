@@ -14,10 +14,22 @@
         <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1024px-Wikipedia-logo-v2.svg.png"
              alt="Logo">
     </div>
-    <div class="search-box">
-        <input type="text" placeholder=" Search Wikipedia...">
-        <button type="submit">Search</button>
-    </div>
+{#<form action="" method="post">#}
+{#    {{ form.hidden_tag() }}#}
+{#    <div class="search-box">#}
+{#        {{ form.search.label }}#}
+{#        {{ form.search(class="form-control")}}#}
+{#        {% for error in form.search.errors %}#}
+{#                <div class="alert alert-danger" role="alert">#}
+{#                    {{ error }}#}
+{#                </div>#}
+{#        {% endfor %}#}
+{#        {{ form.submit(type="submit", class="btn btn-primary") }}#}
+{#        <input type="text" placeholder=" Search Wikipedia...">#}
+{#        <button type="submit">Search</button>#}
+{#    </div>#}
+{#</form>#}
+{% block search %}{% endblock %}
 
     <div class="user-links">
         {% if current_user.is_authenticated %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Результаты поиска</h1>
+{% for item in articles %}
+<div class="col-md6 border rounded">
+    <p><a href="/wiki/{{ item.title }}">{{item.title}}</a></p>
+</div>
+{% endfor %}
+{% endblock %}
