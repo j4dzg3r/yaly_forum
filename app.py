@@ -7,16 +7,17 @@ from data import db_session
 from data.revisions import Revision
 from data.articles import Article
 from data.users import User
+from data.roles import Role
 from forms.search import SearchForm
 
 from forms.user import UserSignInForm, UserSignUpForm
 from forms.revision import RevisionForm
+from forms.to_verificate import VerifyForm
 
 from api.articles import ArticleAPI
 
 from datetime import datetime, timedelta
 from markdown import markdown
-from markdownify import markdownify
 
 from tools.nlp import tokenize
 
@@ -96,7 +97,7 @@ def article(title):
     if article_exist:
         article = db_sess.query(Article).filter(Article.title == title).first()
         if request.method == "GET" and article_exist:
-            form.content.data = markdownify(article.revisions[-1].markdown_content)
+            form.content.data = markdown(article.revisions[-1].markdown_content)
     if action == "edit":
         if form.validate_on_submit():
             if not article_exist:
@@ -104,14 +105,12 @@ def article(title):
                     title=title
                 )
                 db_sess.add(article)
-            md_to_html = markdown(form.content.data)
             revision = Revision(
-                # author_id=current_user.id,
-                author_id=1,
+                author_id=current_user.get_id(),
                 article_id=article.id,
                 created_at=datetime.now(),
                 description=form.description.data,
-                markdown_content=md_to_html,
+                markdown_content=form.content.data,
                 verified=False
             )
 
@@ -142,7 +141,7 @@ def article(title):
                 rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
             else:
                 rev = last_rev
-            html_lines = hu("".join(list(html.readlines())), rev.markdown_content)
+            html_lines = hu("".join(list(html.readlines())), markdown(rev.markdown_content))
             html.close()
             return render_template_string(html_lines,
                                           title=title,
@@ -151,6 +150,33 @@ def article(title):
                                           old_rev=rev)
         else:
             return render_template('article.html', title=title, answer=False)
+
+
+@app.route("/wiki/revision/<int:revision_id>", methods=['GET', 'POST'])
+def article_revision(revision_id):
+    form = VerifyForm()
+    sess = db_session.create_session()
+    if form.validate_on_submit():
+        sess.query(Revision). \
+            filter(Revision.id == revision_id). \
+            update({'verified': form.verify.data})
+        sess.commit()
+    is_moder = False
+    u, r = sess.query(User, Role).filter(User.id == current_user.get_id()).first()
+    if u and r.role in ["moderator", "admin"]:
+        is_moder = True
+    revision = sess.query(Revision).filter(Revision.id == revision_id).join(Article).first()
+    form.verify.data = revision.verified
+    html = open("templates/m_revision.html").read()
+    if revision:
+        html_res = hu(html, markdown(revision.markdown_content))
+        meta_info = {"author": revision.author.nickname,
+                     "date": revision.created_at.strftime("%d/%m/%Y, %H:%M:%S"),
+                     "description": revision.description}
+        return render_template_string(html_res, meta_info=meta_info,
+                                      title=revision.article_id, answer=True, is_moder=is_moder, form=form)
+    html_res = hu(html, "")
+    return render_template_string(html_res, meta_info={}, title=revision_id, answer=False, form=form)
 
 
 @app.route('/lol')
@@ -174,8 +200,18 @@ def search(search: str):
         if len(search_token & i) > 0:
             ids.append(j)
     sess = db_session.create_session()
-    articles = sess.query(Article).filter(Article.id.in_(ids)).all()
+    articles = sess.query(Article).filter(Article.id.in_(ids)).join(Revision).filter(Revision.verified == True).all()
     return render_template("search_results.html", articles=articles)
+
+
+@app.route("/moderate")
+def moderate():
+    sess = db_session.create_session()
+    user, role = sess.query(User, Role).filter(User.id == current_user.get_id()).first()
+    if role.role not in ["moderator", "admin"]:
+        return render_template("article.html", title="Вы не можете модерировать статьи", answer=True)
+    revisions_to_moderates = sess.query(Revision).filter(Revision.verified == False).all()
+    return render_template("revisions_to_moderate.html", revisions=revisions_to_moderates)
 
 
 @app.route('/')
