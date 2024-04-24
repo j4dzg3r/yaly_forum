@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block search %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="search-box">
+        {{ form.search.label }}
+        {{ form.search(class="form-control")}}
+        {% for error in form.search.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+        {% endfor %}
+        {{ form.submit(type="submit", class="btn btn-primary") }}
+{#        <input type="text" placeholder=" Search Wikipedia...">#}
+{#        <button type="submit">Search</button>#}
+    </div>
+</form>
+{% endblock %}

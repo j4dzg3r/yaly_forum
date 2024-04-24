@@ -11,7 +11,7 @@ def get_by_id(article_id):
     res = (sess.query(Article)
            .join(Revision)
            .filter(Article.id == article_id)
-           .filter_by(verified=False)
+           .filter_by(verified=True)
            .order_by(Revision.created_at.desc())
            .first())
     return res
@@ -22,7 +22,7 @@ def get_by_title(article_title):
     res = (sess.query(Article)
            .join(Revision)
            .filter(Article.title == article_title)
-           .filter_by(verified=False)
+           .filter_by(verified=True)
            .order_by(Revision.created_at.desc())
            .first())
     return res

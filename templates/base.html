@@ -20,9 +20,30 @@
         <input type="text" placeholder=" Search Wikipedia...">
         <button type="submit">Search</button>
     </div>
+    <div class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1024px-Wikipedia-logo-v2.svg.png"
+             alt="Logo">
+    </div>
+{#<form action="" method="post">#}
+{#    {{ form.hidden_tag() }}#}
+{#    <div class="search-box">#}
+{#        {{ form.search.label }}#}
+{#        {{ form.search(class="form-control")}}#}
+{#        {% for error in form.search.errors %}#}
+{#                <div class="alert alert-danger" role="alert">#}
+{#                    {{ error }}#}
+{#                </div>#}
+{#        {% endfor %}#}
+{#        {{ form.submit(type="submit", class="btn btn-primary") }}#}
+{#        <input type="text" placeholder=" Search Wikipedia...">#}
+{#        <button type="submit">Search</button>#}
+{#    </div>#}
+{#</form>#}
+{% block search %}{% endblock %}
 
     <div class="user-links">
         {% if current_user.is_authenticated %}
+            <a class="btn btn-primary " href="/moderate">Модерация</a>
             <a class="navbar-brand" href="/logout">{{ current_user.nickname }}</a>
         {% else %}
             <p>

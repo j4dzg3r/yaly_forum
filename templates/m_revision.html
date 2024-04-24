@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<title>{{ title }}</title>
+    {% if is_moder %}
+        <h4>Так как вы модератор, вы можете проверить эту страницу, а именно поставить на ней верификацию</h4>
+    {% endif %}
+<h1>{{ title }}</h1>
+    {% if answer %}
+        <p>Автор: {{ meta_info.author }}</p>
+        <p>Время публикации: {{ meta_info.date }}</p>
+        <p>Описание: {{ meta_info.description }}</p>
+    {% endif %}
+    <p>Текст статьи:</p>
+<div class="article">
+    {% if answer %}
+        ~hu~
+    {% else %}
+        <h4>Такого ревью не существует.</h4>
+    {% endif %}
+</div>
+    {% if is_moder %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>{{ form.verify() }} {{ form.verify.label }}</p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </form>
+    {% endif %}
+
+{% endblock %}

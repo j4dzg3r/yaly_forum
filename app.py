@@ -7,9 +7,12 @@ from data import db_session
 from data.revisions import Revision
 from data.articles import Article
 from data.users import User
+from data.roles import Role
+from forms.search import SearchForm
 
 from forms.user import UserSignInForm, UserSignUpForm
 from forms.revision import RevisionForm
+from forms.to_verificate import VerifyForm
 
 from api.articles import ArticleAPI
 
@@ -18,12 +21,16 @@ from markdown import markdown
 from markdownify import markdownify
 import difflib
 
+from tools.nlp import tokenize
+
+
 template_dir = "templates"
 static_dir = "static"
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.json.sort_keys = False
 app.config["SECRET_KEY"] = "dfaasdjkfajsdkfjaklsdhjklfasjhdk"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.article_index = {}
 api = Api(app)
 api.add_resource(ArticleAPI,
                  '/articles/id/<int:article_id>',
@@ -114,13 +121,12 @@ def article(title):
     form = RevisionForm()
     action = request.args.get('action')
     oldid = request.args.get('oldid')
-    diff = request.args.get('diff')
     db_sess = db_session.create_session()
     article_exist = (title,) in list(db_sess.query(Article.title).all())
     if article_exist:
         article = db_sess.query(Article).filter(Article.title == title).first()
         if request.method == "GET" and article_exist:
-            form.content.data = markdownify(article.revisions[-1].markdown_content)
+            form.content.data = markdown(article.revisions[-1].markdown_content)
     if action == "edit":
         if form.validate_on_submit():
             if not article_exist:
@@ -129,7 +135,7 @@ def article(title):
                 )
                 db_sess.add(article)
             revision = Revision(
-                author_id=current_user.id,
+                author_id=current_user.get_id(),
                 article_id=article.id,
                 created_at=datetime.now(),
                 description=form.description.data,
@@ -140,6 +146,7 @@ def article(title):
             article.revisions.append(revision)
             db_sess.merge(article)
             db_sess.commit()
+            app.article_index[tokenize(title)] = article.id
             return redirect(f'/wiki/{title}')
         return render_template('revision.html',
                                answer=article_exist,
@@ -178,6 +185,7 @@ def article(title):
                                               title=title,
                                               answer=True)
 
+            html = open("templates/article.html", encoding="utf8")
             if oldid:
                 rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
             else:
@@ -194,14 +202,67 @@ def article(title):
             return render_template('article.html', title=title, answer=False)
 
 
+@app.route("/wiki/revision/<int:revision_id>", methods=['GET', 'POST'])
+def article_revision(revision_id):
+    form = VerifyForm()
+    sess = db_session.create_session()
+    if form.validate_on_submit():
+        sess.query(Revision). \
+            filter(Revision.id == revision_id). \
+            update({'verified': form.verify.data})
+        sess.commit()
+    is_moder = False
+    u, r = sess.query(User, Role).filter(User.id == current_user.get_id()).first()
+    if u and r.role in ["moderator", "admin"]:
+        is_moder = True
+    revision = sess.query(Revision).filter(Revision.id == revision_id).join(Article).first()
+    form.verify.data = revision.verified
+    html = open("templates/m_revision.html").read()
+    if revision:
+        html_res = hu(html, markdown(revision.markdown_content))
+        meta_info = {"author": revision.author.nickname,
+                     "date": revision.created_at.strftime("%d/%m/%Y, %H:%M:%S"),
+                     "description": revision.description}
+        return render_template_string(html_res, meta_info=meta_info,
+                                      title=revision.article_id, answer=True, is_moder=is_moder, form=form)
+    html_res = hu(html, "")
+    return render_template_string(html_res, meta_info={}, title=revision_id, answer=False, form=form)
+
+
 @app.route('/lol')
 def lol():
     return render_template('article.html')
 
 
-@app.route('/wiki')
+@app.route('/wiki', methods=["GET", "POST"])
 def wiki():
     return redirect("/wiki/Заглавная страница")
+    form = SearchForm()
+    if form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{form.search.data}")
+    return render_template("index.html", form=form, title="Wiki")
+
+
+@app.route('/search/<string:search>')
+def search(search: str):
+    ids = []
+    search_token = tokenize(search)
+    for i, j in app.article_index.items():
+        if len(search_token & i) > 0:
+            ids.append(j)
+    sess = db_session.create_session()
+    articles = sess.query(Article).filter(Article.id.in_(ids)).join(Revision).filter(Revision.verified == True).all()
+    return render_template("search_results.html", articles=articles)
+
+
+@app.route("/moderate")
+def moderate():
+    sess = db_session.create_session()
+    user, role = sess.query(User, Role).filter(User.id == current_user.get_id()).first()
+    if role.role not in ["moderator", "admin"]:
+        return render_template("article.html", title="Вы не можете модерировать статьи", answer=True)
+    revisions_to_moderates = sess.query(Revision).filter(Revision.verified == False).all()
+    return render_template("revisions_to_moderate.html", revisions=revisions_to_moderates)
 
 
 @app.route('/')
@@ -211,6 +272,10 @@ def index():
 
 def main() -> None:
     db_session.global_init("db/yaly.sqlite")
+    sess = db_session.create_session()
+    articles = sess.query(Article).all()
+    for article in articles:
+        app.article_index[tokenize(article.title)] = article.id
     app.run(host=HOST, port=PORT, debug=True)
 
 
