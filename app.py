@@ -16,6 +16,7 @@ from api.articles import ArticleAPI
 from datetime import datetime, timedelta
 from markdown import markdown
 from markdownify import markdownify
+import difflib
 
 template_dir = "templates"
 static_dir = "static"
@@ -77,8 +78,35 @@ def sign_up():
     return render_template("sign_up_user.html", form=form, title="Sign Up")
 
 
-def hu(html, content):
-    return html.replace("~hu~", content)
+def hu(file, content):
+    html = open(f"templates/{file}", encoding="utf8")
+    html_lines = "".join(list(html.readlines()))
+    html.close()
+    return html_lines.replace("~hu~", content)
+
+
+def differences(txt1, txt2):
+    txt1_list = txt1.splitlines()
+    txt2_list = txt2.splitlines()
+    print(txt1_list)
+    print(txt2_list)
+    differ = difflib.Differ()
+    diff = differ.compare(txt1_list, txt2_list)
+    diff_list = []
+    for i in diff:
+        diff_list.append([i[:1], i[2:]])
+    print(diff_list)
+    out = ""
+    for i in diff_list:
+        if i[0] == " ":
+            color = "white"
+            i[0] = "."
+        elif i[0] == "-":
+            color = "red"
+        elif i[0] == "+" or i[0] == "?":
+            color = "yellow"
+        out += f"<p> <span style='background-color:{color}; line-height: 0.9em'>{i[0]} </span>{i[1]}</p>"
+    return out
 
 
 @app.route('/wiki/<string:title>', methods=['GET', 'POST'])
@@ -86,6 +114,7 @@ def article(title):
     form = RevisionForm()
     action = request.args.get('action')
     oldid = request.args.get('oldid')
+    diff = request.args.get('diff')
     db_sess = db_session.create_session()
     article_exist = (title,) in list(db_sess.query(Article.title).all())
     if article_exist:
@@ -99,13 +128,12 @@ def article(title):
                     title=title
                 )
                 db_sess.add(article)
-            md_to_html = markdown(form.content.data)
             revision = Revision(
                 author_id=current_user.id,
                 article_id=article.id,
                 created_at=datetime.now(),
                 description=form.description.data,
-                markdown_content=md_to_html,
+                markdown_content=form.content.data,
                 verified=False
             )
 
@@ -119,6 +147,10 @@ def article(title):
                                form=form)
     elif action == "history":
         revisions = db_sess.query(Revision).filter(Revision.article_id == article.id).all()
+        if request.method == 'POST':
+            first_rev_id = request.form['first_rev'][2:]
+            second_rev_id = request.form['second_rev'][2:]
+            return redirect(f"{first_rev_id}+{second_rev_id}")
         nick = db_sess.query(Revision).filter(Revision.article_id == article.id).first().author.nickname
         print(nick)
         return render_template('history.html',
@@ -129,18 +161,34 @@ def article(title):
         if article_exist:
             article = db_sess.query(Article).filter(Article.title == title).first()
             last_rev = db_sess.query(Revision).filter(Revision.article_id == article.id).all()[-1]
+            if diff:
+                if not oldid:
+                    revisions = db_sess.query(Revision).filter(Revision.article_id == article.id).all()
+                    # Если не oldid не задан - сравнение с предпоследней версией
+                    for i in range(len(revisions)):
+                        if revisions[i].id == int(diff):
+                            oldid = i
+                else:
+                    oldid = int(oldid)
+                old_rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
+                content = differences(old_rev.markdown_content, last_rev.markdown_content).replace("\n", "<br>")
+                html_lines = hu("article.html", content)
+                print([content])
+                return render_template_string(html_lines,
+                                              title=title,
+                                              answer=True)
 
-            html = open("templates/article.html", encoding="utf8")
             if oldid:
                 rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
             else:
                 rev = last_rev
-            html_lines = hu("".join(list(html.readlines())), rev.markdown_content)
-            html.close()
+            content = rev.markdown_content
+            html_lines = hu("article.html", markdown(content))
             return render_template_string(html_lines,
                                           title=title,
                                           answer=True,
-                                          is_old=["cur", "?old", "?cur"][int(oldid is not None) + int(oldid is not None and int(oldid) == last_rev.id)],
+                                          is_old=["cur", "?old", "?cur"][int(oldid is not None) + int(
+                                              oldid is not None and int(oldid) == last_rev.id)],
                                           old_rev=rev)
         else:
             return render_template('article.html', title=title, answer=False)
@@ -153,7 +201,7 @@ def lol():
 
 @app.route('/wiki')
 def wiki():
-    return render_template("base.html", title="Wiki")
+    return redirect("/wiki/Заглавная страница")
 
 
 @app.route('/')

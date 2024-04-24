@@ -6,14 +6,19 @@
 <title>{{ title }}: история изменений</title>
 
 <h1>{{ title }}: история изменений</h1>
-<ul style="list-style-type:disc">
-    {% for rev in revisions[::-1] %}
-    <li data-revid="{{ rev_id }}" class="revision">
-        <span>
-            <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at }}</a> {{ rev.author.nickname }} {{ rev.description }} {{ rev.verified }}
-        </span>
-    </li>
-    {% endfor %}
-</ul>
-
+<form action="" method="POST">
+    <ul style="list-style-type:disc">
+        {% for rev in revisions[::-1] %}
+            <li data-revid="{{ rev_id }}" class="revision">
+                <span>
+                    <input type="radio" name="first_rev" id="1_{{ loop.index }}" value="1_{{ loop.index }}">
+                    <input type="radio" name="second_rev" id="2_{{ loop.index }}" value="2_{{ loop.index }}">
+                    <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at }}</a> {{ rev.author.nickname }} «{{ rev.description }}» {% if not rev.verified%}не{% endif %} проверена
+                    <br>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+    <input type="submit" style="border: 1px solid red; padding: 10px;">
+</form>
 {% endblock %}
