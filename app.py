@@ -92,6 +92,10 @@ def hu(file, content):
     return html_lines.replace("~hu~", content)
 
 
+def hu2(html, content):
+    return html.replace("~hu~", content)
+
+
 def differences(txt1, txt2):
     txt1_list = txt1.splitlines()
     txt2_list = txt2.splitlines()
@@ -215,13 +219,17 @@ def article_revision(revision_id):
     form.verify.data = revision.verified
     html = open("templates/m_revision.html").read()
     if revision:
-        html_res = hu(html, markdown(revision.markdown_content))
-        meta_info = {"author": revision.author.nickname,
+        html_res = hu2(html, markdown(revision.markdown_content))
+        try:
+            author = revision.author.nickname
+        except AttributeError:
+            author = "None"
+        meta_info = {"author": author,
                      "date": revision.created_at.strftime("%d/%m/%Y, %H:%M:%S"),
                      "description": revision.description}
         return render_template_string(html_res, meta_info=meta_info,
                                       title=revision.article_id, answer=True, is_moder=is_moder, form=form)
-    html_res = hu(html, "")
+    html_res = hu2(html, "")
     return render_template_string(html_res, meta_info={}, title=revision_id, answer=False, form=form)
 
 
@@ -232,7 +240,6 @@ def lol():
 
 @app.route('/wiki', methods=["GET", "POST"])
 def wiki():
-    return redirect("/wiki/Заглавная страница")
     form = SearchForm()
     if form.validate_on_submit():
         return redirect(f"http://{HOST}:{PORT}/search/{form.search.data}")
