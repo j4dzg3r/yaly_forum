@@ -95,14 +95,11 @@ def hu(file, content):
 def differences(txt1, txt2):
     txt1_list = txt1.splitlines()
     txt2_list = txt2.splitlines()
-    print(txt1_list)
-    print(txt2_list)
     differ = difflib.Differ()
     diff = differ.compare(txt1_list, txt2_list)
     diff_list = []
     for i in diff:
         diff_list.append([i[:1], i[2:]])
-    print(diff_list)
     out = ""
     for i in diff_list:
         if i[0] == " ":
@@ -121,6 +118,7 @@ def article(title):
     form = RevisionForm()
     action = request.args.get('action')
     oldid = request.args.get('oldid')
+    diff = request.args.get('diff')
     db_sess = db_session.create_session()
     article_exist = (title,) in list(db_sess.query(Article.title).all())
     if article_exist:
@@ -159,7 +157,6 @@ def article(title):
             second_rev_id = request.form['second_rev'][2:]
             return redirect(f"{first_rev_id}+{second_rev_id}")
         nick = db_sess.query(Revision).filter(Revision.article_id == article.id).first().author.nickname
-        print(nick)
         return render_template('history.html',
                                answer=article_exist,
                                title=title,
@@ -180,7 +177,6 @@ def article(title):
                 old_rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
                 content = differences(old_rev.markdown_content, last_rev.markdown_content).replace("\n", "<br>")
                 html_lines = hu("article.html", content)
-                print([content])
                 return render_template_string(html_lines,
                                               title=title,
                                               answer=True)
