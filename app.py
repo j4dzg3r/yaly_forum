@@ -22,6 +22,7 @@ from markdownify import markdownify
 import difflib
 
 from tools.nlp import tokenize
+import nltk
 
 
 template_dir = "templates"
@@ -274,6 +275,8 @@ def index():
 
 
 def main() -> None:
+    nltk.download("punkt")
+    nltk.download("stopwords")
     db_session.global_init("db/yaly.sqlite")
     sess = db_session.create_session()
     articles = sess.query(Article).all()
