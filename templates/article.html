@@ -9,9 +9,9 @@
 {% if is_old and is_old != "cur" %}
     {% set author = old_rev.author.nickname %}
     {% if is_old == "?old" %}
-        <h4>Это старая версия статьи, сохранённая <a href="/wiki/Участник:{{ author }}">{{ author }}</a> в {{ old_rev.created_at }}. Она может серьёзно отличаться от <a href="/wiki/{{ title }}">текущей версии.</a></h4>
+        <h4>This is an old revision of this page, as edited by <a href="/wiki/User:{{ author }}">{{ author }}</a> at {{ old_rev.created_at }}. It may differ significantly from the <a href="/wiki/{{ title }}">current version</a>.</h4>
     {% elif is_old == "?cur" %}
-        <h4>Это <a href="/wiki/{{ title }}">текущая версия.</a> страницы, сохранённая <a href="/wiki/Участник:{{ author }}">{{ author }}</a> в {{ old_rev.created_at }}. Вы просматриваете постоянную ссылку на эту версию.</h4>
+        <h4>It's a <a href="/wiki/{{ title }}">current version</a> of a page, as edited by <a href="/wiki/User:{{ author }}">{{ author }}</a> at {{ old_rev.created_at }}. The present address (URL) is a permanent link to this version.</h4>
     {% endif %}
 {% endif %}
 
@@ -19,7 +19,7 @@
     {% if answer %}
         ~hu~
     {% else %}
-        <h4>Такой статьи не существует. Вы можете <a href="/wiki/{{ title }}?action=edit">создать</a> её</h4>
+        <h4>The page with that name does not exist. You can <a href="/wiki/{{ title }}?action=edit">create</a> it.</h4>
     {% endif %}
 </div>
 

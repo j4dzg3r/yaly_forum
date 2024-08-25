@@ -4,20 +4,20 @@
 
 <title>{{ title }}</title>
     {% if is_moder %}
-        <h4>Так как вы модератор, вы можете проверить эту страницу, а именно поставить на ней верификацию</h4>
+        <h4>As a moderator, you can verify that version of page.</h4>
     {% endif %}
 <h1>{{ title }}</h1>
     {% if answer %}
-        <p>Автор: {{ meta_info.author }}</p>
-        <p>Время публикации: {{ meta_info.date }}</p>
-        <p>Описание: {{ meta_info.description }}</p>
+        <p>Author: {{ meta_info.author }}</p>
+        <p>Publication time: {{ meta_info.date }}</p>
+        <p>Description: {{ meta_info.description }}</p>
     {% endif %}
-    <p>Текст статьи:</p>
+    <p>Article text:</p>
 <div class="article">
     {% if answer %}
         ~hu~
     {% else %}
-        <h4>Такого ревью не существует.</h4>
+        <h4>Revision with that ID does not exist!</h4>
     {% endif %}
 </div>
     {% if is_moder %}

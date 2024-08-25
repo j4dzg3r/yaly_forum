@@ -21,19 +21,19 @@
     <div class="user-links">
         {% if current_user.is_authenticated %}
             {% if answer %}
-                <a class="btn btn-primary " href="/moderate">Модерация</a>
+                <a class="btn btn-primary " href="/moderate">Moderation</a>
             {% endif %}
             <a class="navbar-brand" href="/logout">{{ current_user.nickname }}</a>
         {% else %}
             <p>
-                <a class="btn btn-primary " href="/sign_up">Зарегистрироваться</a>
-                <a class="btn btn-success" href="/sign_in">Войти</a>
+                <a class="btn btn-primary " href="/sign_up">Sign up</a>
+                <a class="btn btn-success" href="/sign_in">Log in</a>
             </p>
         {% endif %}
         <br>
         {% if answer %}
-            <a href="/wiki/{{ title }}?action=edit">Править</a>
-            <a href="/wiki/{{ title }}?action=history">История</a>
+            <a href="/wiki/{{ title }}?action=edit">Edit</a>
+            <a href="/wiki/{{ title }}?action=history">View history</a>
         {% endif %}
     </div>
 </header>
@@ -43,8 +43,8 @@
     <div class="main-content">
         <aside class="left-sidebar">
             <div class="accordion">
-                <a href="/wiki">Заглавная страница</a>
-                <a href="/wiki/Служебная:Случайная_страница">Случайная статья</a>
+                <a href="/wiki">Main page</a>
+                <a href="/wiki/Special:Random_article">Random article</a>
             </div>
         </aside>
         <div class="right-content">
@@ -52,10 +52,6 @@
         </div>
     </div>
 </main>
-
-<footer>
-    <!-- Footer content goes here -->
-</footer>
 
 </body>
 </html>

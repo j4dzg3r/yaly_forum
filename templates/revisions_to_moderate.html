@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Статьи на модерацию</h1>
+<title>
+    Pages to be moderated
+</title>
+
+<h1>Pages to be moderated</h1>
 {% for item in revisions %}
 <div class="col-md6 border rounded">
     <p><a href="/wiki/revision/{{ item.id }}">{{ item.id }}: {{ item.article.title }}</a></p>

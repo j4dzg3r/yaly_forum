@@ -24,7 +24,6 @@ import difflib
 from tools.nlp import tokenize
 import nltk
 
-
 template_dir = "templates"
 static_dir = "static"
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
@@ -173,7 +172,7 @@ def article(title):
             if diff:
                 if not oldid:
                     revisions = db_sess.query(Revision).filter(Revision.article_id == article.id).all()
-                    # Если не oldid не задан - сравнение с предпоследней версией
+                    # If oldid is not specified, the comparison will be made with the previous version.
                     for i in range(len(revisions)):
                         if revisions[i].id == int(diff):
                             oldid = i
@@ -248,9 +247,9 @@ def wiki():
 
 
 @app.route('/search/<string:search>')
-def search(search: str):
+def search(search_: str):
     ids = []
-    search_token = tokenize(search)
+    search_token = tokenize(search_)
     for i, j in app.article_index.items():
         if len(search_token & i) > 0:
             ids.append(j)
@@ -264,7 +263,7 @@ def moderate():
     sess = db_session.create_session()
     user, role = sess.query(User, Role).filter(User.id == current_user.get_id()).first()
     if role.role not in ["moderator", "admin"]:
-        return render_template("article.html", title="Вы не можете модерировать статьи", answer=True)
+        return render_template("article.html", title="You cannot moderate articles.", answer=True)
     revisions_to_moderates = sess.query(Revision).filter(Revision.verified == False).all()
     return render_template("revisions_to_moderate.html", revisions=revisions_to_moderates)
 
@@ -275,7 +274,7 @@ def index():
 
 
 def main() -> None:
-    nltk.download("punkt")
+    nltk.download("punkt_tab")
     nltk.download("stopwords")
     db_session.global_init("db/yaly.sqlite")
     sess = db_session.create_session()

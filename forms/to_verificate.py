@@ -3,5 +3,5 @@ from wtforms import SubmitField, BooleanField
 
 
 class VerifyForm(FlaskForm):
-    verify = BooleanField("Проверено")
-    submit = SubmitField('Сохранить')
+    verify = BooleanField("Verified")
+    submit = SubmitField('Submit')
