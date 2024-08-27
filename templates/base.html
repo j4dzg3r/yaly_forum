@@ -4,19 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet"
-          href="https://ru.wikipedia.org//w/load.php?lang=ru&modules=codex-search-styles%7Cext.echo.styles.badge%7Cext.flaggedRevs.basic%2Cicons%7Cext.tmh.player.styles%7Cext.uls.interlanguage%7Cext.visualEditor.desktopArticleTarget.noscript%7Cext.wikimediaBadges%7Cjquery.makeCollapsible.styles%7Cmediawiki.widgets.styles%7Coojs-ui-core.icons%2Cstyles%7Coojs-ui.styles.icons-alerts%2Cindicators%7Cskins.vector.styles.legacy&only=styles&skin=vector">
+    <link rel="stylesheet" href="https://ru.wikipedia.org//w/load.php?lang=ru&modules=codex-search-styles%7Cext.echo.styles.badge%7Cext.flaggedRevs.basic%2Cicons%7Cext.tmh.player.styles%7Cext.uls.interlanguage%7Cext.visualEditor.desktopArticleTarget.noscript%7Cext.wikimediaBadges%7Cjquery.makeCollapsible.styles%7Cmediawiki.widgets.styles%7Coojs-ui-core.icons%2Cstyles%7Coojs-ui.styles.icons-alerts%2Cindicators%7Cskins.vector.styles.legacy&only=styles&skin=vector">
 </head>
 
 <body>
 <header>
-    <a href="/wiki">
+    <a href="/wiki/Main_page">
         <div class="logo">
             <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1024px-Wikipedia-logo-v2.svg.png"
                  alt="Logo">
         </div>
     </a>
-    {% block search %}{% endblock %}
+
+    <form action="" method="post">
+        {{ search_form.hidden_tag() }}
+        <div class="search-box">
+            {{ search_form.search.label }}
+            {{ search_form.search(class="form-control")}}
+                {% for error in search_form.search.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+            {% endfor %}
+            {{ search_form.submit(type="submit", class="btn btn-primary") }}
+        </div>
+    </form>
 
     <div class="user-links">
         {% if current_user.is_authenticated %}
@@ -43,7 +55,7 @@
     <div class="main-content">
         <aside class="left-sidebar">
             <div class="accordion">
-                <a href="/wiki">Main page</a>
+                <a href="/wiki/Main_page">Main page</a>
                 <a href="/wiki/Special:Random_article">Random article</a>
             </div>
         </aside>

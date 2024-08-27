@@ -3,27 +3,27 @@
 {% block content %}
     <h1>Log in</h1>
     <form action="" method="post">
-        {{ form.hidden_tag() }}
+        {{ sign_in_form.hidden_tag() }}
         <p>
-            {{ form.email.label }}<br>
-            {{ form.email(class="form-control", type="email") }}<br>
-            {% for error in form.email.errors %}
+            {{ sign_in_form.email.label }}<br>
+            {{ sign_in_form.email(class="form-control", type="email") }}<br>
+            {% for error in sign_in_form.email.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.password.label }}<br>
-            {{ form.password(class="form-control", type="password") }}<br>
-            {% for error in form.password.errors %}
+            {{ sign_in_form.password.label }}<br>
+            {{ sign_in_form.password(class="form-control", type="password") }}<br>
+            {% for error in sign_in_form.password.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
-        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        <p>{{ sign_in_form.remember_me() }} {{ sign_in_form.remember_me.label }}</p>
+        <p>{{ sign_in_form.submit(type="submit", class="btn btn-primary") }}</p>
         <div>{{ message }}</div>
     </form>
 {% endblock %}

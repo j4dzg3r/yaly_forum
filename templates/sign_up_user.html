@@ -3,62 +3,62 @@
 {% block content %}
     <h1>Create account</h1>
     <form action="" method="post">
-        {{ form.hidden_tag() }}
+        {{ sign_up_form.hidden_tag() }}
         <p>
-            {{ form.email.label }}<br>
-            {{ form.email(class="form-control", type="email") }}<br>
-            {% for error in form.email.errors %}
+            {{ sign_up_form.email.label }}<br>
+            {{ sign_up_form.email(class="form-control", type="email") }}<br>
+            {% for error in sign_up_form.email.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.password.label }}<br>
-            {{ form.password(class="form-control", type="password") }}<br>
-            {% for error in form.password.errors %}
+            {{ sign_up_form.password.label }}<br>
+            {{ sign_up_form.password(class="form-control", type="password") }}<br>
+            {% for error in sign_up_form.password.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.repeat_password.label }}<br>
-            {{ form.repeat_password(class="form-control", type="password") }}<br>
-            {% for error in form.repeat_password.errors %}
+            {{ sign_up_form.repeat_password.label }}<br>
+            {{ sign_up_form.repeat_password(class="form-control", type="password") }}<br>
+            {% for error in sign_up_form.repeat_password.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.nickname.label }}<br>
-            {{ form.nickname(class="form-control") }}<br>
-            {% for error in form.nickname.errors %}
+            {{ sign_up_form.nickname.label }}<br>
+            {{ sign_up_form.nickname(class="form-control") }}<br>
+            {% for error in sign_up_form.nickname.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.age.label }}<br>
-            {{ form.age(class="form-control") }}<br>
-            {% for error in form.age.errors %}
+            {{ sign_up_form.age.label }}<br>
+            {{ sign_up_form.age(class="form-control") }}<br>
+            {% for error in sign_up_form.age.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
         <p>
-            {{ form.description.label }}<br>
-            {{ form.description(class="form-control") }}<br>
-            {% for error in form.description.errors %}
+            {{ sign_up_form.description.label }}<br>
+            {{ sign_up_form.description(class="form-control") }}<br>
+            {% for error in sign_up_form.description.errors %}
                 <div class="alert alert-danger" role="alert">
                     {{ error }}
                 </div>
             {% endfor %}
         </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        <p>{{ sign_up_form.submit(type="submit", class="btn btn-primary") }}</p>
         <div>{{ message }}</div>
     </form>
 {% endblock %}

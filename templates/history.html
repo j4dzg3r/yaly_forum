@@ -1,10 +1,7 @@
-{% extends "base.html" %}
-
+{% extends "index.html" %}
 
 {% block content %}
-
 <title>{{ title }}: revision history</title>
-
 <h1>{{ title }}: revision history</h1>
 <form action="" method="POST">
     <ul style="list-style-type:disc">
@@ -13,7 +10,7 @@
                 <span>
                     <input type="radio" name="first_rev" id="1_{{ loop.index }}" value="1_{{ loop.index }}">
                     <input type="radio" name="second_rev" id="2_{{ loop.index }}" value="2_{{ loop.index }}">
-                    <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at }}</a> {{ rev.author.nickname }} «{{ rev.description }}» {% if not rev.verified%}isn't{% endif %} revised
+                    <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at.strftime("%H:%M:%S, %d %b %Y") }}</a> {{ rev.author.nickname }} «{{ rev.description }}» {% if not rev.verified%}isn't{% endif %} revised
                     <br>
                 </span>
             </li>

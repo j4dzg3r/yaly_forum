@@ -57,46 +57,60 @@ def logout():
 
 @app.route('/sign_in', methods=['GET', 'POST'])
 def sign_in():
-    form = UserSignInForm()
-    if form.validate_on_submit():
+    search_form = SearchForm()
+    if search_form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+    sign_in_form = UserSignInForm()
+    if sign_in_form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
+        user = db_sess.query(User).filter(User.email == sign_in_form.email.data).first()
+        if user and user.check_password(sign_in_form.password.data):
+            login_user(user, remember=sign_in_form.remember_me.data)
             return redirect('/')
-        return render_template("sign_in_user.html", message="Incorrect email or password", form=form)
-    return render_template("sign_in_user.html", form=form, title="Sign In")
+        return render_template("sign_in_user.html", message="Incorrect email or password", form=sign_in_form, search_form=search_form)
+    return render_template("sign_in_user.html", sign_in_form=sign_in_form, title="Sign In", search_form=search_form)
 
 
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
-    form = UserSignUpForm()
-    if form.validate_on_submit():
+    search_form = SearchForm()
+    if search_form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+    sign_up_form = UserSignUpForm()
+    if sign_up_form.validate_on_submit():
         db_sess = db_session.create_session()
         user = User()
-        user.email = form.email.data
-        user.set_password(form.password.data)
-        user.nickname = form.nickname.data
-        user.age = form.age.data
-        user.description = form.description.data
+        user.email = sign_up_form.email.data
+        user.set_password(sign_up_form.password.data)
+        user.nickname = sign_up_form.nickname.data
+        user.age = sign_up_form.age.data
+        user.description = sign_up_form.description.data
         db_sess.add(user)
         db_sess.commit()
         return redirect('/')
-    return render_template("sign_up_user.html", form=form, title="Sign Up")
+    return render_template("sign_up_user.html", sign_up_form=sign_up_form, title="Sign Up", search_form=search_form)
 
 
-def hu(file, content):
-    html = open(f"templates/{file}", encoding="utf8")
-    html_lines = "".join(list(html.readlines()))
-    html.close()
-    return html_lines.replace("~hu~", content)
+def detect_templates(file_name: str, hu_content: str) -> str:
+    out = open(f"templates/{file_name}", encoding="utf8").read().replace("~hu~", hu_content)
+
+    # all articles
+    db_sess = db_session.create_session()
+    all_articles_list = list(db_sess.query(Article.title, Article.id).all())
+    all_articles = f"""<div style="border: 3px #CDCDCD solid; padding: 10px">
+                   <h3 style="">All articles on Wikipedia ({len(all_articles_list)})</h3>"""
+    for article in all_articles_list:
+        all_articles += '''<div style="display: flex; justify-content: space-between;">\n'''
+        last_rev = db_sess.query(Revision).filter(Revision.article_id == article[1]).all()[-1]
+        all_articles += f"""<span><a href="/wiki/{article[0]}">{article[0]}</a> ({len(last_rev.markdown_content)})</span>
+        <span><a href="/wiki/User:{last_rev.author.nickname}">{last_rev.author.nickname}</a></span>
+        </div>"""
+
+    out = out.replace("~all articles~", all_articles)
+    return out
 
 
-def hu2(html, content):
-    return html.replace("~hu~", content)
-
-
-def differences(txt1, txt2):
+def differences(txt1: str, txt2: str) -> str:
     txt1_list = txt1.splitlines()
     txt2_list = txt2.splitlines()
     differ = difflib.Differ()
@@ -119,7 +133,12 @@ def differences(txt1, txt2):
 
 @app.route('/wiki/<string:title>', methods=['GET', 'POST'])
 def article(title):
-    form = RevisionForm()
+    search_form = SearchForm()
+    if search_form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+
+    title = title.replace("_", " ")
+    revision_form = RevisionForm()
     action = request.args.get('action')
     oldid = request.args.get('oldid')
     diff = request.args.get('diff')
@@ -128,20 +147,20 @@ def article(title):
     if article_exist:
         article = db_sess.query(Article).filter(Article.title == title).first()
         if request.method == "GET" and article_exist:
-            form.content.data = markdown(article.revisions[-1].markdown_content)
+            revision_form.content.data = markdown(article.revisions[-1].markdown_content)
     if action == "edit":
-        if form.validate_on_submit():
+        if revision_form.validate_on_submit():
             if not article_exist:
                 article = Article(
                     title=title
                 )
                 db_sess.add(article)
             revision = Revision(
-                author_id=current_user.get_id(),
+                author_id=current_user.id if current_user.is_authenticated else 0,
                 article_id=article.id,
                 created_at=datetime.now(),
-                description=form.description.data,
-                markdown_content=form.content.data,
+                description=revision_form.description.data,
+                markdown_content=revision_form.content.data,
                 verified=False
             )
 
@@ -153,18 +172,19 @@ def article(title):
         return render_template('revision.html',
                                answer=article_exist,
                                title=title,
-                               form=form)
+                               form=revision_form,
+                               search_form=search_form)
     elif action == "history":
         revisions = db_sess.query(Revision).filter(Revision.article_id == article.id).all()
         if request.method == 'POST':
             first_rev_id = request.form['first_rev'][2:]
             second_rev_id = request.form['second_rev'][2:]
             return redirect(f"{first_rev_id}+{second_rev_id}")
-        nick = db_sess.query(Revision).filter(Revision.article_id == article.id).first().author.nickname
         return render_template('history.html',
                                answer=article_exist,
                                title=title,
-                               revisions=revisions)
+                               revisions=revisions,
+                               search_form=search_form)
     else:
         if article_exist:
             article = db_sess.query(Article).filter(Article.title == title).first()
@@ -180,29 +200,30 @@ def article(title):
                     oldid = int(oldid)
                 old_rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
                 content = differences(old_rev.markdown_content, last_rev.markdown_content).replace("\n", "<br>")
-                html_lines = hu("article.html", content)
+                html_lines = detect_templates("article.html", content)
                 return render_template_string(html_lines,
                                               title=title,
-                                              answer=True)
+                                              answer=True,
+                                              search_form=search_form)
 
-            html = open("templates/article.html", encoding="utf8")
             if oldid:
                 rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
             else:
                 rev = last_rev
             content = rev.markdown_content
-            html_lines = hu("article.html", markdown(content))
+            html_lines = detect_templates("article.html", markdown(content))
+            old = ["cur", "?old", "?cur"][int(oldid is not None) + int(oldid is not None and int(oldid) == last_rev.id)]
             return render_template_string(html_lines,
                                           title=title,
                                           answer=True,
-                                          is_old=["cur", "?old", "?cur"][int(oldid is not None) + int(
-                                              oldid is not None and int(oldid) == last_rev.id)],
-                                          old_rev=rev)
+                                          is_old=old,
+                                          old_rev=rev,
+                                          search_form=search_form)
         else:
-            return render_template('article.html', title=title, answer=False)
+            return render_template('article.html', title=title, answer=False, search_form=search_form)
 
 
-@app.route("/wiki/revision/<int:revision_id>", methods=['GET', 'POST'])
+@app.route('/wiki/revision/<int:revision_id>', methods=['GET', 'POST'])
 def article_revision(revision_id):
     form = VerifyForm()
     sess = db_session.create_session()
@@ -217,9 +238,8 @@ def article_revision(revision_id):
         is_moder = True
     revision = sess.query(Revision).filter(Revision.id == revision_id).join(Article).first()
     form.verify.data = revision.verified
-    html = open("templates/m_revision.html").read()
     if revision:
-        html_res = hu2(html, markdown(revision.markdown_content))
+        html_res = detect_templates("m_revision.html", markdown(revision.markdown_content))
         try:
             author = revision.author.nickname
         except AttributeError:
@@ -229,48 +249,49 @@ def article_revision(revision_id):
                      "description": revision.description}
         return render_template_string(html_res, meta_info=meta_info,
                                       title=revision.article_id, answer=True, is_moder=is_moder, form=form)
-    html_res = hu2(html, "")
+    html_res = detect_templates("m_revision.html", "")
     return render_template_string(html_res, meta_info={}, title=revision_id, answer=False, form=form)
-
-
-@app.route('/lol')
-def lol():
-    return render_template('article.html')
 
 
 @app.route('/wiki', methods=["GET", "POST"])
 def wiki():
-    form = SearchForm()
-    if form.validate_on_submit():
-        return redirect(f"http://{HOST}:{PORT}/search/{form.search.data}")
-    return render_template("index.html", form=form, title="Wiki")
+    search_form = SearchForm()
+    if search_form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+    return render_template("index.html", title="Wiki", search_form=search_form)
 
 
 @app.route('/search/<string:search>')
-def search(search_: str):
+def search(search: str):
+    search_form = SearchForm()
+    if search_form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
     ids = []
-    search_token = tokenize(search_)
+    search_token = tokenize(search)
     for i, j in app.article_index.items():
         if len(search_token & i) > 0:
             ids.append(j)
     sess = db_session.create_session()
     articles = sess.query(Article).filter(Article.id.in_(ids)).join(Revision).filter(Revision.verified == True).all()
-    return render_template("search_results.html", articles=articles)
+    return render_template("search_results.html", articles=articles, search_form=search_form)
 
 
 @app.route("/moderate")
 def moderate():
+    search_form = SearchForm()
+    if search_form.validate_on_submit():
+        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
     sess = db_session.create_session()
     user, role = sess.query(User, Role).filter(User.id == current_user.get_id()).first()
     if role.role not in ["moderator", "admin"]:
         return render_template("article.html", title="You cannot moderate articles.", answer=True)
     revisions_to_moderates = sess.query(Revision).filter(Revision.verified == False).all()
-    return render_template("revisions_to_moderate.html", revisions=revisions_to_moderates)
+    return render_template("revisions_to_moderate.html", revisions=revisions_to_moderates, search_form=search_form)
 
 
 @app.route('/')
 def index():
-    return redirect('/wiki')
+    return redirect('/wiki/Main_page')
 
 
 def main() -> None:

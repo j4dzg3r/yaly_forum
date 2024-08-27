@@ -1,10 +1,10 @@
-{% extends "base.html"%}
+{% extends "index.html"%}
 
 {% block content %}
 
 <title>{{ title }}</title>
 
-<h1>{{ title }}</h1>
+<div class="page-title">{{ title }}</div>
 <p> From Wikipedia, the free encyclopedia</p>
 {% if is_old and is_old != "cur" %}
     {% set author = old_rev.author.nickname %}
