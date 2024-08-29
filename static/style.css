@@ -120,6 +120,10 @@ header {
     margin-bottom: 10px;
 }
 
+.right-content .red-link {
+    color: red;
+}
+
 .right-content h1 {
     font-size: 24px;
     border-bottom: 2px solid black;

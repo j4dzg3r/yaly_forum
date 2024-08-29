@@ -7,10 +7,11 @@
     <ul style="list-style-type:disc">
         {% for rev in revisions[::-1] %}
             <li data-revid="{{ rev_id }}" class="revision">
-                <span>
+                <span style="background-color:{% if not rev.verified %}#fff2cc{% endif %}">
                     <input type="radio" name="first_rev" id="1_{{ loop.index }}" value="1_{{ loop.index }}">
                     <input type="radio" name="second_rev" id="2_{{ loop.index }}" value="2_{{ loop.index }}">
-                    <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at.strftime("%H:%M:%S, %d %b %Y") }}</a> {{ rev.author.nickname }} «{{ rev.description }}» {% if not rev.verified%}isn't{% endif %} revised
+                    <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at.strftime("%H:%M:%S, %d %b %Y") }}</a>
+                    — {% if not rev.author_id %}anonymous user{% else %}{{ rev.author.nickname }}{% endif %} <i>«{{ rev.description }}»</i>
                     <br>
                 </span>
             </li>

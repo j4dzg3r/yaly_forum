@@ -4,6 +4,6 @@ from wtforms.validators import DataRequired
 
 
 class RevisionForm(FlaskForm):
-    content = TextAreaField("Content", validators=[DataRequired()])
+    content = TextAreaField("Content", validators=[DataRequired()], render_kw={"class": "text-area-field"})
     description = StringField("Revision description", validators=[DataRequired()])
-    submit = SubmitField('Submit')
+    submit = SubmitField("Publish changes")

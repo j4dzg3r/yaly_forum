@@ -2,43 +2,41 @@
 {% block content %}
 <title>
     {% if answer %}
-    Editing: {{ title }}
-
+        Editing: {{ title }}
     {% else %}
-    Creating a page «{{ title }}»
+        Creating a page «{{ title }}»
     {% endif %}
 </title>
 
-<p>While revising or creating an article use Markdown language.</p>
 <h1>
     {% if answer %}
-    Editing: {{ title }}
+        Editing: {{ title }}
     {% else %}
-    Creating a page «{{ title }}»
+        Creating a page «{{ title }}»
     {% endif %}
 </h1>
-
+<p>When writing or editing an article, Markdown language should be used.</p>
 <form action="" method="post">
-    {{ form.hidden_tag() }}
+    {{ revision_form.hidden_tag() }}
     <p>
-        {{ form.content.label }}<br>
-        {{ form.content(class="form-control", data=default) }}<br>
-        {% for error in form.content.errors %}
+        {{ revision_form.content(class="form-control", data=default, style="height: 280px; width: 900px;") }}<br>
+        {% for error in revision_form.content.errors %}
             <p content="alert alert-danger" role="alert">
                 {{ error }}
             </p>
         {% endfor %}
     </p>
     <p>
-        {{ form.description.label }}<br>
-        {{ form.description(class="form-control", data=default) }}<br>
-        {% for error in form.description.errors %}
+        Edit summary <small>(Briefly describe your changes)</small>
+        <br>
+        {{ revision_form.description(class="form-control", data=default) }}<br>
+        {% for error in revision_form.description.errors %}
             <p content="alert alert-danger" role="alert">
                 {{ error }}
             </p>
         {% endfor %}
     </p>
-    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    <p>{{ revision_form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}
 </form>
 {% endblock %}
