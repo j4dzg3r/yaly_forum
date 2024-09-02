@@ -11,7 +11,7 @@
                     <input type="radio" name="first_rev" id="1_{{ loop.index }}" value="1_{{ loop.index }}">
                     <input type="radio" name="second_rev" id="2_{{ loop.index }}" value="2_{{ loop.index }}">
                     <a href="/wiki/{{ title }}?oldid={{ rev.id }}">{{ rev.created_at.strftime("%H:%M:%S, %d %b %Y") }}</a>
-                    — {% if not rev.author_id %}anonymous user{% else %}{{ rev.author.nickname }}{% endif %} <i>«{{ rev.description }}»</i>
+                    — {% if not rev.author_id %}anonymous user{% else %}<a href="/wiki/User:{{ rev.author.nickname }}">{{ rev.author.nickname }}</a>{% endif %} <i>«{{ rev.description }}»</i>
                     <br>
                 </span>
             </li>
