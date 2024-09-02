@@ -60,7 +60,7 @@ def logout():
 def sign_in():
     search_form = SearchForm()
     if search_form.validate_on_submit():
-        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+        return redirect(f"/search/{search_form.search.data}")
     sign_in_form = UserSignInForm()
     if sign_in_form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -87,7 +87,7 @@ def sign_in():
 def sign_up():
     search_form = SearchForm()
     if search_form.validate_on_submit():
-        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+        return redirect(f"search/{search_form.search.data}")
     sign_up_form = UserSignUpForm()
     if sign_up_form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -130,9 +130,9 @@ def generate_link_html(match):
     title = match.group(1)
     link_exists = db_session.create_session().query(Article).filter_by(title=title).first() is not None
     if link_exists:
-        return f'<a href="/wiki/{title}">{title}</a>'
+        return f"""<a href="/wiki/{title.replace(' ', '_')}">{title}</a>"""
     else:
-        return f'<a href="/wiki/{title}" class="red-link">{title}</a>'
+        return f"""<a href="/wiki/{title.replace(' ', '_')}" class="red-link">{title}</a>"""
 
 
 def detect_templates(file_name: str, hu_content: str) -> str:
@@ -178,20 +178,21 @@ def differences(txt1: str, txt2: str) -> str:
         elif i[0] == "+" or i[0] == "?":
             color = "yellow"
         out += f"<p> <span style='background-color:{color}; line-height: 0.9em'>{i[0]} </span>{i[1]}</p>"
-    return out
+    return out.replace("\n", "<br>")
 
 
 @app.route('/wiki/<string:title>', methods=['GET', 'POST'])
 def article(title):
     search_form = SearchForm()
     if search_form.validate_on_submit():
-        return redirect(f"http://{HOST}:{PORT}/search/{search_form.search.data}")
+        return redirect(f"/search/{search_form.search.data}")
 
     title = title.replace("_", " ")
     revision_form = RevisionForm()
     action = request.args.get('action')
-    oldid = request.args.get('oldid')
     diff = request.args.get('diff')
+    oldid = request.args.get('oldid')
+    print([title, action, diff, oldid])
     db_sess = db_session.create_session()
     article_exist = (title,) in list(db_sess.query(Article.title).all())
     if article_exist:
@@ -211,14 +212,14 @@ def article(title):
                 created_at=datetime.now(),
                 description=revision_form.description.data,
                 markdown_content=revision_form.content.data,
-                verified=False
+                verified=current_user.is_authenticated and current_user.role_id is not None
             )
 
             article.revisions.append(revision)
             db_sess.merge(article)
             db_sess.commit()
             app.article_index[article.id] = tokenize(title)
-            return redirect(f'/wiki/{title}')
+            return redirect(f"/wiki/{title.replace(' ', '_')}")
         return render_template('revision.html',
                                answer=article_exist,
                                title=title,
@@ -229,7 +230,7 @@ def article(title):
         if request.method == 'POST':
             first_rev_id = request.form['first_rev'][2:]
             second_rev_id = request.form['second_rev'][2:]
-            return redirect(f"{first_rev_id}+{second_rev_id}")
+            return redirect(f"/wiki/{title.replace(' ', '_')}?diff={second_rev_id}&oldid={first_rev_id}")
         return render_template('history.html',
                                answer=article_exist,
                                title=title,
@@ -248,12 +249,14 @@ def article(title):
                             oldid = i
                 else:
                     oldid = int(oldid)
+
                 old_rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
-                content = differences(old_rev.markdown_content, last_rev.markdown_content).replace("\n", "<br>")
+                content = differences(old_rev.markdown_content, last_rev.markdown_content)
                 html_lines = detect_templates("article.html", content)
                 return render_template_string(html_lines,
                                               title=title,
                                               answer=True,
+                                              action=diff,
                                               search_form=search_form)
 
             if oldid:

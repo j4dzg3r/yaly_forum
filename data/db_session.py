@@ -1,3 +1,4 @@
+from os.path import exists
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
@@ -17,6 +18,7 @@ def global_init(db_file):
     if not db_file or not db_file.strip():
         raise Exception("You need to specify the database file.")
 
+    base_exists = exists(db_file.strip())
     conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
     print(f"Connecting to the database at {conn_str}")
 
@@ -26,6 +28,19 @@ def global_init(db_file):
     from . import __all_models
 
     SqlAlchemyBase.metadata.create_all(engine)
+    if not base_exists:
+        db_session = create_session()
+        db_session.merge(__all_models.roles.Role(role="admin"))
+        admin = __all_models.users.User(
+            nickname='admin',
+            age=30,
+            email="admin@mail.com",
+            role_id=1
+        )
+        admin.set_password("lol")
+        db_session.merge(admin)
+        db_session.commit()
+        print("commited")
 
 
 def create_session() -> Session:
