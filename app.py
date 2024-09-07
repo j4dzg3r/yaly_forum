@@ -135,12 +135,14 @@ def generate_link_html(match):
         return f"""<a href="/wiki/{title.replace(' ', '_')}" class="red-link">{title}</a>"""
 
 
-def detect_templates(file_name: str, hu_content: str) -> str:
+def detect_templates(file_name: str, hu_content: str, only_paste=False) -> str:
     # Inserting article text
     out = open(f"templates/{file_name}", encoding="utf8").read().replace("~hu~", hu_content)
+    if only_paste:
+        return out
+
     # Detecting links and red links
     out = re.sub(r'\[(.*?)\]', generate_link_html, out)
-
     # all articles
     if out.find("~all articles~"):
         db_sess = db_session.create_session()
@@ -156,6 +158,7 @@ def detect_templates(file_name: str, hu_content: str) -> str:
             else:
                 all_articles += "\t<span>anonymous user</span>\n"
             all_articles += "</div>\n"
+        all_articles += "</div>\n"
         out = out.replace("~all articles~", all_articles)
     return out
 
@@ -252,7 +255,7 @@ def article(title):
 
                 old_rev = db_sess.query(Revision).filter(Revision.id == oldid).first()
                 content = differences(old_rev.markdown_content, last_rev.markdown_content)
-                html_lines = detect_templates("article.html", content)
+                html_lines = detect_templates("article.html", content, only_paste=True)
                 return render_template_string(html_lines,
                                               title=title,
                                               answer=True,
